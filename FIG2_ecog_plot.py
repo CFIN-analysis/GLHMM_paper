@@ -35,6 +35,7 @@ Date: 12/12/2023
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import pickle
 
 from glhmm import glhmm
 from glhmm import graphics
@@ -52,7 +53,7 @@ monkey = 1
 #plotting fontsize
 fontsize = 8
 
-
+"""
 # ---------------------- LOAD DATA -----------------------
 x1 = pd.read_csv(outdir +'ECoG_NeuralComputation_PLS/x1.txt', header = None)
 y1 = pd.read_csv(outdir + 'ECoG_NeuralComputation_PLS/y1.txt', header = None)
@@ -102,9 +103,20 @@ options = {'cyc':100,'initrep':0}
 # train the HMM
 Gamma,Xi,fe = hmm.train(xpca,y,ind,options=options)
 
-   
+# Save Gamma and hmm for reproducibiity
+np.save(outdir + 'Gamma.npy', Gamma)
+with open(outdir + 'hmm.pkl', 'wb') as f:
+    pickle.dump(hmm, f)
+
+"""
+
 # --------------------------- PLOT A -------------------------------
 
+# Load Gamma and hmm
+Gamma = np.load(outdir + 'Gamma.npy')
+with open(outdir + 'hmm.pkl', 'rb') as f:
+    hmm = pickle.load(f)
+ 
 # graphics.show_beta(hmm,only_active_states=True,X=xpca,Y=y,Gamma=Gamma)
 graphics.show_beta(hmm)
 
@@ -129,20 +141,14 @@ for i, ax in enumerate(fig.get_axes()):
     for item in ax.get_xticklabels() + ax.get_yticklabels():
         item.set_fontsize(fontsize - 2)  # Adjust the fontsize as needed
 
-
     ax.grid(False)  # Adjust linewidth, linestyle, and color
 
-   
-    # Add ticks in -0.25, 0, and 0.25
-    for ax in fig.get_axes():
-        ax.set_xticks([-0.25, 0, 0.25])
-        ax.set_yticks([-0.25, 0, 0.25])
-        ax.set_xticklabels(['-0.25', '0', '0.25'])
-        ax.set_yticklabels(['-0.25', '0', '0.25'])          
+    for ax in fig.get_axes():     
         # Access the scatter plot attributes and modify them
         scatter = ax.collections[0]
         scatter.set_sizes([7])  # Set smaller marker size
         scatter.set_alpha(0.5)
+        scatter.set_edgecolor('none')
 plt.show()
 
 
